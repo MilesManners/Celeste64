@@ -229,7 +229,7 @@ public class ArchipelagoManager
         _connectionInfo = connectionInfo;
     }
 
-    public async Task<LoginFailure> TryConnect()
+    public async Task<LoginFailure?> TryConnect()
     {
         _lastDeath = DateTime.MinValue;
         _session = ArchipelagoSessionFactory.CreateSession(_connectionInfo.Url);
@@ -380,6 +380,12 @@ public class ArchipelagoManager
             Disconnect();
         }
     }
+
+    public NetworkItem ScoutLocation(string location)
+    {
+        return LocationDictionary[LocationStringToID[location]];
+    }
+    
     public void UpdateGameStatus(ArchipelagoClientState state)
     {
         SendPacket(new StatusUpdatePacket { Status = state });

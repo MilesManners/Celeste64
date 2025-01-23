@@ -388,7 +388,8 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
         }
 
         // DeathLink Handling
-        if (stateMachine.State != States.StrawbGet &&
+        if (Game.Instance.ArchipelagoEnabled &&
+            stateMachine.State != States.StrawbGet &&
 			stateMachine.State != States.Bubble &&
 			stateMachine.State != States.Cutscene &&
 			stateMachine.State != States.StrawbReveal &&
@@ -858,7 +859,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		Save.CurrentRecord.Deaths++;
 		Dead = true;
 
-		if (sendDeath)
+		if (Game.Instance.ArchipelagoEnabled && sendDeath)
 		{
 			Game.Instance.ArchipelagoManager.SendDeathLinkIfEnabled("couldn't climb the mountain");
         }
@@ -875,7 +876,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 
 	private bool TryClimb()
 	{
-		if (Game.Instance.ArchipelagoManager.MoveShuffle)
+		if (Game.Instance.ArchipelagoEnabled && Game.Instance.ArchipelagoManager.MoveShuffle)
 		{
 			if (Save.CurrentRecord.GetFlag("Climb") == 0)
 			{
@@ -932,10 +933,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 
 	private void BreakBlock(BreakBlock block, Vec3 direction)
 	{
-        if (Save.CurrentRecord.GetFlag("Breakables") == 0)
-        {
-            return;
-        }
+        if (Game.Instance.ArchipelagoEnabled && Save.CurrentRecord.GetFlag("Breakables") == 0) return;
 
         World.HitStun = 0.1f;
 		block.Break(direction);
@@ -1264,17 +1262,10 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 
 	private bool TryDash()
 	{
-		if (Game.Instance.ArchipelagoManager.MoveShuffle)
+		if (Game.Instance.ArchipelagoEnabled && Game.Instance.ArchipelagoManager.MoveShuffle)
 		{
-			if (onGround && Save.CurrentRecord.GetFlag("Grounded Dash") == 0)
-			{
-				return false;
-			}
-
-			if (!onGround && Save.CurrentRecord.GetFlag("Air Dash") == 0)
-			{
-				return false;
-			}
+			if (onGround && Save.CurrentRecord.GetFlag("Grounded Dash") == 0) return false;
+			if (!onGround && Save.CurrentRecord.GetFlag("Air Dash") == 0) return false;
 		}
 
 		if (dashes > 0 && tDashCooldown <= 0 && Controls.Dash.ConsumePress())
@@ -1283,7 +1274,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 			stateMachine.State = States.Dashing;
 			return true;
 		}
-		else return false;
+		return false;
 	}
 
 	private void StDashingEnter()
@@ -1418,13 +1409,9 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 
 	private void StSkiddingUpdate()
 	{
-		if (Game.Instance.ArchipelagoManager.MoveShuffle)
-		{
+		if (Game.Instance.ArchipelagoEnabled && Game.Instance.ArchipelagoManager.MoveShuffle)
 			if (Save.CurrentRecord.GetFlag("Skid Jump") == 0)
-			{
 				tNoSkidJump = .1f;
-			}
-		}
 
 		if (tNoSkidJump > 0)
 			tNoSkidJump -= Time.Delta;
@@ -1521,13 +1508,22 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 
 		if (dashes > 0 && tDashCooldown <= 0 && Controls.Dash.ConsumePress())
         {
-            if (!Game.Instance.ArchipelagoManager.MoveShuffle || Save.CurrentRecord.GetFlag("Air Dash") != 0)
-            {
+	        if (Game.Instance.ArchipelagoEnabled)
+	        {
+		        if (!Game.Instance.ArchipelagoManager.MoveShuffle || Save.CurrentRecord.GetFlag("Air Dash") != 0)
+		        {
+			        stateMachine.State = States.Dashing;
+			        dashes--;
+			        return;
+		        }
+	        }
+	        else
+	        {
 				stateMachine.State = States.Dashing;
 				dashes--;
 				return;
-            }
-		}
+	        }
+        }
 
 		CancelGroundSnap();
 
@@ -1700,7 +1696,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 
 	#region StrawbGet State
 
-	private Strawberry? lastStrawb;
+	private Collectable? lastStrawb;
 	private Vec2 strawbGetForward;
 
 	private void StStrawbGetEnter()
@@ -1722,12 +1718,11 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		Model.Flags = ModelFlags.Default | ModelFlags.Silhouette;
 		Hair.Flags = ModelFlags.Default | ModelFlags.Silhouette;
 
-		if (lastStrawb != null && lastStrawb.BubbleTo.HasValue)
-		{
+		if (lastStrawb == null) return;
+		
+		if (lastStrawb.BubbleTo.HasValue)
 			BubbleTo(lastStrawb.BubbleTo.Value);
-		}
-
-		if (lastStrawb != null)
+		else
 			World.Destroy(lastStrawb);
 	}
 
@@ -1767,7 +1762,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		}
 	}
 
-	public void StrawbGet(Strawberry strawb)
+	public void StrawbGet(Collectable strawb)
 	{
 		if (stateMachine.State != States.StrawbGet)
 		{
@@ -1926,7 +1921,16 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		// dashing
 		if (dashes > 0 && tDashCooldown <= 0 && Controls.Dash.ConsumePress())
 		{
-			if (!Game.Instance.ArchipelagoManager.MoveShuffle || Save.CurrentRecord.GetFlag("Air Dash") != 0)
+			if (Game.Instance.ArchipelagoEnabled)
+			{
+				if (!Game.Instance.ArchipelagoManager.MoveShuffle || Save.CurrentRecord.GetFlag("Air Dash") != 0)
+				{
+					stateMachine.State = States.Dashing;
+					dashes--;
+					return;
+				}
+			}
+			else
 			{
 				stateMachine.State = States.Dashing;
 				dashes--;
@@ -1938,7 +1942,6 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		if (Controls.Climb.Down && TryClimb())
 		{
 			stateMachine.State = States.Climbing;
-			return;
 		}
 	}
 

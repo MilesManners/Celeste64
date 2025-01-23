@@ -92,7 +92,19 @@ public class Map
 		["EndingArea"] = new((map, entity) => new EndingArea()) { UseSolidsAsBounds = true },
 		["Fog"] = new((map, entity) => new FogRing(entity)),
 		["FixedCamera"] = new((map, entity) => new FixedCamera(map.FindTargetNodeFromParam(entity, "target"))) { UseSolidsAsBounds = true },
-		["IntroCar"] = new((map, entity) => new IntroCar(entity.GetFloatProperty("scale", 6)))
+		["IntroCar"] = new((map, entity) => new IntroCar(entity.GetFloatProperty("scale", 6))),
+		["Blahaj"] = new ActorFactory((map, entity) =>
+		{
+			var id = $"{map.LoadWorld!.Entry.Map}/{map.LoadBlahajCounter}";
+			var lockedCondition = entity.GetStringProperty("targetname", string.Empty);
+			var isLocked = entity.GetIntProperty("locked", 0) > 0;
+			var playUnlockSound = entity.GetIntProperty("noUnlockSound", 0) == 0;
+			Vec3? bubbleTo = null;
+			if (map.FindTargetNode(entity.GetStringProperty("bubbleto", string.Empty), out var point))
+				bubbleTo = point;
+			map.LoadBlahajCounter++;
+			return new Blahaj(id, isLocked, lockedCondition, playUnlockSound, bubbleTo);
+		})
 	};
 
 	private readonly Dictionary<string, DefaultMaterial> currentMaterials = [];
@@ -108,6 +120,7 @@ public class Map
 	// kind of a hack, but assigned during load, unset after
 	public World? LoadWorld;
 	public int LoadStrawberryCounter = 0;
+	public int LoadBlahajCounter = 0;
 
 	public Map(string name, string filename)
 	{
@@ -196,6 +209,7 @@ public class Map
 	{
 		LoadWorld = world;
 		LoadStrawberryCounter = 0;
+		LoadBlahajCounter = 0;
 
 		// create materials for each texture type so they can be shared by each surface
 		currentMaterials.Clear();
@@ -268,7 +282,9 @@ public class Map
 			LoadActor(world, entity);
 
 		Log.Info($"Strawb Count: {LoadStrawberryCounter}");
+		Log.Info($"Shork Count: {LoadBlahajCounter}");
 		LoadStrawberryCounter = 0;
+		LoadBlahajCounter = 0;
 		LoadWorld = null;
 	}
 

@@ -68,6 +68,7 @@ public class Game : Module
 	public AudioHandle Music;
 
 	public bool ConnectedSuccessfully = false;
+	public bool ArchipelagoEnabled = false;
 
 
     public ArchipelagoManager ArchipelagoManager { get; set; }
@@ -90,26 +91,31 @@ public class Game : Module
 
 		scenes.Push(new Startup());
 
-
         // Archipelago
-        string data = File.ReadAllText(ArchipelagoManager.ConnectionInfoPath);
-        ArchipelagoConnectionInfo AP_Conn = JsonSerializer.Deserialize(data, ArchipelagoConnectionInfoContext.Default.ArchipelagoConnectionInfo);
+        var data = File.ReadAllText(ArchipelagoManager.ConnectionInfoPath);
+        var apConn = JsonSerializer.Deserialize(data, ArchipelagoConnectionInfoContext.Default.ArchipelagoConnectionInfo);
 
-        ArchipelagoManager = new ArchipelagoManager(new()
+        if (apConn?.Url is null || apConn?.SlotName is null || apConn?.Password is null) // Unable to deserialize JSON
         {
-            Url = AP_Conn?.Url,
-            SlotName = AP_Conn?.SlotName,
-            Password = AP_Conn?.Password,
-        });
-
-        var result = ArchipelagoManager.TryConnect().Result;
-		if (result == null)
-        {
-            Log.Info("Login Success");
-			ConnectedSuccessfully = true;
+	        ConnectedSuccessfully = false;
         }
-		// End Archipelago
-    }
+        else
+        {
+	        ArchipelagoManager = new ArchipelagoManager(new ArchipelagoConnectionInfo
+	        {
+		        Url = apConn.Url,
+		        SlotName = apConn.SlotName,
+		        Password = apConn.Password,
+	        });
+
+	        var result = ArchipelagoManager.TryConnect().Result;
+	        if (result == null)
+	        {
+		        Log.Info("Login Success");
+		        ConnectedSuccessfully = true;
+	        }
+        }
+	}
 
 	public override void Shutdown()
 	{
@@ -202,20 +208,20 @@ public class Game : Module
 			// perform transition
 			switch (transition.Mode)
 			{
-			case Transition.Modes.Replace:
-			Debug.Assert(transition.Scene != null);
-			if (scenes.Count > 0)
-				scenes.Pop();
-			scenes.Push(transition.Scene());
-			break;
-			case Transition.Modes.Push:
-			Debug.Assert(transition.Scene != null);
-			scenes.Push(transition.Scene());
-			audioBeatCounter = 0;
-			break;
-			case Transition.Modes.Pop:
-			scenes.Pop();
-			break;
+				case Transition.Modes.Replace:
+					Debug.Assert(transition.Scene != null);
+					if (scenes.Count > 0)
+						scenes.Pop();
+					scenes.Push(transition.Scene());
+					break;
+				case Transition.Modes.Push:
+					Debug.Assert(transition.Scene != null);
+					scenes.Push(transition.Scene());
+					audioBeatCounter = 0;
+					break;
+				case Transition.Modes.Pop:
+					scenes.Pop();
+					break;
 			}
 
 			// don't let the game sit in a sceneless place
@@ -320,7 +326,7 @@ public class Game : Module
 			}
 		}
 
-        if (scene is Celeste64.World)
+        if (ArchipelagoEnabled && scene is World)
 		{
             ArchipelagoManager.CheckReceivedItemQueue();
             ArchipelagoManager.CheckLocationsToSend();

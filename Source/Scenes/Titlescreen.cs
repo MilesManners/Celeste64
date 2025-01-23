@@ -20,8 +20,31 @@ public class Titlescreen : Scene
 		easing = Calc.Approach(easing, 1, Time.Delta / 5.0f);
 		inputDelay = Calc.Approach(inputDelay, 0, Time.Delta);
 
-		if (Controls.Confirm.Pressed && !Game.Instance.IsMidTransition && Game.Instance.ConnectedSuccessfully)
+		if (Controls.Confirm.Pressed && !Game.Instance.IsMidTransition)
 		{
+			Game.Instance.ArchipelagoEnabled = false;
+			
+			Audio.Play(Sfx.main_menu_first_input);
+			Game.Instance.Goto(new Transition()
+			{
+				Mode = Transition.Modes.Replace,
+				Scene = () => new Overworld(false),
+				ToBlack = new AngledWipe(),
+				ToPause = true
+			});
+		}
+		
+		if (Controls.Climb.Pressed && !Game.Instance.IsMidTransition && Game.Instance.ConnectedSuccessfully)
+		{
+			Game.Instance.ArchipelagoEnabled = true;
+			
+			var filePath = Path.Join(App.UserPath, "ap-save.json");
+			if (File.Exists(filePath))
+				Save.Instance = Save.Deserialize(File.ReadAllText(filePath)) ?? new Save();
+			else
+				Save.Instance = new Save();
+			Save.Instance.SyncSettings();
+			
 			Audio.Play(Sfx.main_menu_first_input);
 			Game.Instance.Goto(new Transition()
 			{
@@ -101,14 +124,16 @@ public class Titlescreen : Scene
 				var at = bounds.BottomRight + new Vec2(-16, -4) * Game.RelativeScale + new Vec2(0, -UI.PromptSize);
 				UI.Prompt(batch, Controls.Cancel, Loc.Str("Exit"), at, out var width, 1.0f);
 				at.X -= width + 8 * Game.RelativeScale;
+				UI.Prompt(batch, Controls.Confirm, Loc.Str("Confirm"), at, out _, 1.0f);
+				at.X -= width + 8 * Game.RelativeScale;
 
 				if (Game.Instance.ConnectedSuccessfully)
 				{
-					UI.Prompt(batch, Controls.Confirm, Loc.Str("Confirm"), at, out _, 1.0f);
+					UI.Prompt(batch, Controls.Climb, Loc.Str("Archipelago"), at, out _, 1.0f);
 				}
 				else
                 {
-                    UI.Text(batch, "CONNECTION FAILED", bounds.BottomCenter + new Vec2(-10, -4) * Game.RelativeScale, new Vec2(0, 1), Color.Red * 1f);
+                    UI.Text(batch, "CONNECTION FAILED", bounds.BottomCenter + new Vec2(-60, -8) * Game.RelativeScale, new Vec2(0, 1), Color.Red * 1f);
                 }
 
 				UI.Text(batch, Game.VersionString, bounds.BottomLeft + new Vec2(4, -4) * Game.RelativeScale, new Vec2(0, 1), Color.White * 0.25f);

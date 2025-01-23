@@ -24,24 +24,26 @@ public sealed class Coin : Actor, IHaveModels, IHaveSprites, IPickup, ICastPoint
 
 	public override void Update()
 	{
+		if (!Game.Instance.ArchipelagoEnabled) return;
+		
 		if (Save.CurrentRecord.GetFlag("Coin") == 0)
-        {
-            foreach (var mat in Model.Materials)
+		{
+			foreach (var mat in Model.Materials)
 			{
 				var newColor = mat.Color;
 				newColor.A = 0x30;
-                mat.Color = newColor;
+				mat.Color = newColor;
 			}
 		}
 		else
-        {
-            foreach (var mat in Model.Materials)
-            {
-                var newColor = mat.Color;
-                newColor.A = 0xFF;
-                mat.Color = newColor;
-            }
-        }
+		{
+			foreach (var mat in Model.Materials)
+			{
+				var newColor = mat.Color;
+				newColor.A = 0xFF;
+				mat.Color = newColor;
+			}
+		}
 	}
 
     public void CollectSprites(List<Sprite> populate)
@@ -73,10 +75,7 @@ public sealed class Coin : Actor, IHaveModels, IHaveSprites, IPickup, ICastPoint
 
 	public void Pickup(Player player)
     {
-        if (Save.CurrentRecord.GetFlag("Coin") == 0)
-        {
-            return;
-        }
+        if (Game.Instance.ArchipelagoEnabled && Save.CurrentRecord.GetFlag("Coin") == 0) return;
 
         if (!Collected)
 		{

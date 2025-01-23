@@ -51,9 +51,13 @@ public static class UI
 		Icon(batch, "icon_stopwatch", str, at, align);
 	}
 
-	public static void Strawberries(Batcher batch, int count, int req, in Vec2 at, float align = 0)
+	public static void Strawberries(Batcher batch, int count, in Vec2 at, float align = 0, int req = 0)
 	{
-		Icon(batch, "icon_strawberry", $"x{count:00}/{req:00}  ", at, align);
+		Icon(batch, "icon_strawberry", req > 0 ? $"x{count:00}/{req:00}  " : $"x{count:00}  ", at, align);
+	}
+
+	public static void Blahaj(Batcher batch, int count, int req, in Vec2 at, float align = 0)
+	{
 	}
 
 	public static void Deaths(Batcher batch, int count, in Vec2 at, float align = 0)
@@ -68,126 +72,53 @@ public static class UI
 
     public static void Items(Batcher batch, in Vec2 at, float align = 0)
     {
-		Vec2 pos = at;
-		if (Save.CurrentRecord.GetFlag("Breakables") == 0)
-		{
-			Icon(batch, "Breakables_Grey", "", pos, align);
-		}
-		else
-        {
-            Icon(batch, "Breakables_Filled", "", pos, align);
-        }
-        pos.X += (UI.IconSize + 8);
-        if (Save.CurrentRecord.GetFlag("Cassette") == 0)
-        {
-            Icon(batch, "Cassettes_Grey", "", pos, align);
-        }
-        else
-        {
-            Icon(batch, "Cassettes_Filled", "", pos, align);
-        }
-        pos.X -= (UI.IconSize + 8);
-        pos.Y += (UI.IconSize + 8);
-        if (Save.CurrentRecord.GetFlag("Coin") == 0)
-        {
-            Icon(batch, "Coins_Grey", "", pos, align);
-        }
-        else
-        {
-            Icon(batch, "Coins_Filled", "", pos, align);
-        }
-        pos.X += (UI.IconSize + 8);
-        if (Save.CurrentRecord.GetFlag("DashRefill") == 0)
-        {
-            Icon(batch, "Dash_Grey", "", pos, align);
-        }
-        else
-        {
-            Icon(batch, "Dash_Filled", "", pos, align);
-        }
-        pos.X -= (UI.IconSize + 8);
-        pos.Y += (UI.IconSize + 8);
-        if (Save.CurrentRecord.GetFlag("DoubleDashRefill") == 0)
-        {
-            Icon(batch, "DoubleDash_Grey", "", pos, align);
-        }
-        else
-        {
-            Icon(batch, "DoubleDash_Filled", "", pos, align);
-        }
-        pos.X += (UI.IconSize + 8);
-        if (Save.CurrentRecord.GetFlag("Feather") == 0)
-        {
-            Icon(batch, "Feather_Grey", "", pos, align);
-        }
-        else
-        {
-            Icon(batch, "Feather_Filled", "", pos, align);
-        }
-        pos.X -= (UI.IconSize + 8);
-        pos.Y += (UI.IconSize + 8);
-        if (Save.CurrentRecord.GetFlag("Spring") == 0)
-        {
-            Icon(batch, "Springs_Grey", "", pos, align);
-        }
-        else
-        {
-            Icon(batch, "Springs_Filled", "", pos, align);
-        }
-        pos.X += (UI.IconSize + 8);
-        if (Save.CurrentRecord.GetFlag("TrafficBlock") == 0)
-        {
-            Icon(batch, "Traffic_Grey", "", pos, align);
-        }
-        else
-        {
-            Icon(batch, "Traffic_Filled", "", pos, align);
-        }
+		var pos = at;
+		Icon(batch, Save.CurrentRecord.GetFlag("Breakables") == 0 ? "Breakables_Grey" : "Breakables_Filled", "", pos, align);
+		
+		pos.X += (IconSize + 8);
+		Icon(batch, Save.CurrentRecord.GetFlag("Cassette") == 0 ? "Cassettes_Grey" : "Cassettes_Filled", "", pos, align);
+		
+		pos.X -= (IconSize + 8);
+        pos.Y += (IconSize + 8);
+        Icon(batch, Save.CurrentRecord.GetFlag("Coin") == 0 ? "Coins_Grey" : "Coins_Filled", "", pos, align);
+        
+        pos.X += (IconSize + 8);
+        Icon(batch, Save.CurrentRecord.GetFlag("DashRefill") == 0 ? "Dash_Grey" : "Dash_Filled", "", pos, align);
+        
+        pos.X -= (IconSize + 8);
+        pos.Y += (IconSize + 8);
+        Icon(batch, Save.CurrentRecord.GetFlag("DoubleDashRefill") == 0 ? "DoubleDash_Grey" : "DoubleDash_Filled", "", pos, align);
+        
+        pos.X += (IconSize + 8);
+        Icon(batch, Save.CurrentRecord.GetFlag("Feather") == 0 ? "Feather_Grey" : "Feather_Filled", "", pos, align);
+        
+        pos.X -= (IconSize + 8);
+        pos.Y += (IconSize + 8);
+        Icon(batch, Save.CurrentRecord.GetFlag("Spring") == 0 ? "Springs_Grey" : "Springs_Filled", "", pos, align);
+        
+        pos.X += (IconSize + 8);
+        Icon(batch, Save.CurrentRecord.GetFlag("TrafficBlock") == 0 ? "Traffic_Grey" : "Traffic_Filled", "", pos, align);
+        
         if (Game.Instance.ArchipelagoManager.MoveShuffle)
         {
-            pos.X -= (UI.IconSize + 8);
-            pos.Y += (UI.IconSize + 8);
-            if (Save.CurrentRecord.GetFlag("Grounded Dash") == 0)
-            {
-                Icon(batch, "GroundDashGrey", "", pos, align);
-            }
-            else
-            {
-                Icon(batch, "GroundDash", "", pos, align);
-            }
-            pos.X += (UI.IconSize + 8);
-            if (Save.CurrentRecord.GetFlag("Air Dash") == 0)
-            {
-                Icon(batch, "AirDashGrey", "", pos, align);
-            }
-            else
-            {
-                Icon(batch, "AirDash", "", pos, align);
-            }
-            pos.X -= (UI.IconSize + 8);
-            pos.Y += (UI.IconSize + 8);
-            if (Save.CurrentRecord.GetFlag("Skid Jump") == 0)
-            {
-                Icon(batch, "SkidJumpGrey", "", pos, align);
-            }
-            else
-            {
-                Icon(batch, "SkidJump", "", pos, align);
-            }
-            pos.X += (UI.IconSize + 8);
-            if (Save.CurrentRecord.GetFlag("Climb") == 0)
-            {
-                Icon(batch, "ClimbGrey", "", pos, align);
-            }
-            else
-            {
-                Icon(batch, "Climb", "", pos, align);
-            }
+            pos.X -= (IconSize + 8);
+            pos.Y += (IconSize + 8);
+            Icon(batch, Save.CurrentRecord.GetFlag("Grounded Dash") == 0 ? "GroundDashGrey" : "GroundDash", "", pos, align);
+            
+            pos.X += (IconSize + 8);
+            Icon(batch, Save.CurrentRecord.GetFlag("Air Dash") == 0 ? "AirDashGrey" : "AirDash", "", pos, align);
+            
+            pos.X -= (IconSize + 8);
+            pos.Y += (IconSize + 8);
+            Icon(batch, Save.CurrentRecord.GetFlag("Skid Jump") == 0 ? "SkidJumpGrey" : "SkidJump", "", pos, align);
+            
+            pos.X += (IconSize + 8);
+            Icon(batch, Save.CurrentRecord.GetFlag("Climb") == 0 ? "ClimbGrey" : "Climb", "", pos, align);
         }
 
         if (Game.Instance.ArchipelagoManager.BadelinesDisabled)
         {
-            Icon(batch, "BadelineDisabled", "", new Vector2(100, 10), align);
+            Icon(batch, "BadelineDisabled", "", new Vec2(100, 10), align);
         }
     }
 

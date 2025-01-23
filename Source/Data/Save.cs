@@ -6,7 +6,7 @@ namespace Celeste64;
 
 public class Save
 {
-	public const string FileName = "ap_save.json";
+	public const string FileName = "save.json";
 
 	public enum InvertCameraOptions
 	{
@@ -30,7 +30,7 @@ public class Save
 		public TimeSpan Time { get; set; } = new();
 
 		public int GetFlag(string name, int defaultValue = 0) 
-			=> Flags.TryGetValue(name, out int value) ? value : defaultValue;
+			=> Flags.GetValueOrDefault(name, defaultValue);
 
 		public int SetFlag(string name, int value = 1) 
 			=> Flags[name] = value;

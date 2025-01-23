@@ -23,7 +23,8 @@
 		"OptionsTimer": "Timer",
 		"OptionsBGM": "BGM",
 		"OptionsSFX": "SFX",
-		"OptionsInvertCamera": "Inverted Camera"
+		"OptionsInvertCamera": "Inverted Camera",
+		"Archipelago": "Archipelago"
 	},
 	"Dialog":
 	{
@@ -170,6 +171,12 @@
 				"Face": "madeline/Default",
 				"Voice": "madeline/granny3_03_m1",
 				"Text": "That's not how I remember it."
+			}
+		],
+		"GrannyRando": [
+			{
+				"Face": "granny/Default",
+				"Text": "Here's your {0}"
 			}
 		],
 
@@ -345,6 +352,12 @@
 			{
 				"Face": "madeline/Angry",
 				"Text": "..."
+			}
+		],
+		"TheoRando": [
+			{
+				"Face": "Theo/Default",
+				"Text": "Here's your {0}"
 			}
 		],
 
@@ -555,6 +568,12 @@
 				"Text": "Maybe... maybe it'll be okay."
 			}
 		],
+		"BaddyRando": [
+			{
+				"Face": "baddy/Default",
+				"Text": "Here's your {0}"
+			}
+		],
 
 		"Sign1": [
 			{
@@ -702,6 +721,12 @@
 				"Face": "signpost",
 				"Voice": "sign/general_11",
 				"Text": "I surely don't know, for\nI am but a humble signpost."
+			}
+		],
+		"SignRando": [
+			{
+				"Face": "signpost",
+				"Text": "Here's your {0}"
 			}
 		],
 

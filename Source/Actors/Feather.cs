@@ -80,10 +80,7 @@ public class Feather : Actor, IHaveModels, IHaveSprites, IPickup, ICastPointShad
 
 	public void Pickup(Player player)
 	{
-		if (Save.CurrentRecord.GetFlag("Feather") == 0)
-		{
-			return;
-		}
+		if (Game.Instance.ArchipelagoEnabled && Save.CurrentRecord.GetFlag("Feather") == 0) return;
 
 		if (tCooldown <= 0)
 		{

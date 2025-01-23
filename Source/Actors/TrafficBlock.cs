@@ -25,26 +25,29 @@ public class TrafficBlock(Vec3 end) : Solid
 
 	public override void Update()
     {
-        if (Save.CurrentRecord.GetFlag("TrafficBlock") == 0)
-        {
-            foreach (var mat in Model.Materials)
-            {
-                var newColor = mat.Color;
-                newColor.A = 0xA0;
-                mat.Color = newColor;
-            }
-        }
-        else
-        {
-            foreach (var mat in Model.Materials)
-            {
-                var newColor = mat.Color;
-                newColor.A = 0xFF;
-                mat.Color = newColor;
-            }
-        }
-
-        base.Update();
+	    if (Game.Instance.ArchipelagoEnabled)
+	    {
+		    if (Save.CurrentRecord.GetFlag("TrafficBlock") == 0)
+		    {
+			    foreach (var mat in Model.Materials)
+			    {
+				    var newColor = mat.Color;
+				    newColor.A = 0xA0;
+				    mat.Color = newColor;
+			    }
+		    }
+		    else
+		    {
+			    foreach (var mat in Model.Materials)
+			    {
+				    var newColor = mat.Color;
+				    newColor.A = 0xFF;
+				    mat.Color = newColor;
+			    }
+		    }
+	    }
+	    
+		base.Update();
 		routine.Update();
 	}
 
@@ -52,7 +55,7 @@ public class TrafficBlock(Vec3 end) : Solid
     {
         while (true)
         {
-            while (Save.CurrentRecord.GetFlag("TrafficBlock") == 0)
+            while (Game.Instance.ArchipelagoEnabled && Save.CurrentRecord.GetFlag("TrafficBlock") == 0)
             {
                 yield return Co.SingleFrame;
             }

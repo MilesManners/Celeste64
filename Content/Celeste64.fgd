@@ -151,3 +151,14 @@
 [
 
 ]
+
+@PointClass model({ "path": "Models/blahaj.glb", "scale": 12 }) = Blahaj : "Shork Get!" 
+[
+    locked(integer) : "Locked" : 0
+    targetname(string) : "Target Name"
+    bubbleto(string) : "Bubble To" : : "If assigned, Blahaj will bubble the player"
+]
+
+@SolidClass = DreamBlock : "Maddy can enter this solid block by dashing into the side and will exit the other side"
+[
+]

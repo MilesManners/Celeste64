@@ -295,7 +295,7 @@ public class World : Scene
 		}
 		else
 		{
-			if (!Game.Instance.ArchipelagoManager.GoalSent)
+			if (Game.Instance.ArchipelagoEnabled && !Game.Instance.ArchipelagoManager.GoalSent)
 			{
 				if (Save.CurrentRecord.GetFlag("Strawberries") >= Game.Instance.ArchipelagoManager.StrawberriesRequired)
 				{
@@ -308,11 +308,15 @@ public class World : Scene
         // handle strawb counter
         {
             // wiggle when gained
-            if (strawbCounterWas != Save.CurrentRecord.GetFlag("Strawberries"))
+            var strawbs = Game.Instance.ArchipelagoEnabled
+	            ? Save.CurrentRecord.GetFlag("Strawberries")
+	            : Save.CurrentRecord.Strawberries.Count;
+            
+            if (strawbCounterWas != strawbs)
 			{
 				strawbCounterCooldown = 4.0f;
 				strawbCounterWiggle = 1.0f;
-				strawbCounterWas = Save.CurrentRecord.GetFlag("Strawberries");
+				strawbCounterWas = strawbs;
 			}
 			else
 				Calc.Approach(ref strawbCounterWiggle, 0, Time.Delta / .6f);
@@ -890,12 +894,12 @@ public class World : Scene
 						Matrix3x2.CreateTranslation(0, -UI.IconSize / 2) * 
 						Matrix3x2.CreateScale(wiggle) * 
 						Matrix3x2.CreateTranslation(at + new Vec2(-60 * (1 - Ease.Cube.Out(strawbCounterEase)), UI.IconSize / 2)));
-					UI.Strawberries(batch, Save.CurrentRecord.GetFlag("Strawberries"), Game.Instance.ArchipelagoManager.StrawberriesRequired, Vec2.Zero);
+					UI.Strawberries(batch, Save.CurrentRecord.GetFlag("Strawberries"), Vec2.Zero, Game.Instance.ArchipelagoEnabled ? Game.Instance.ArchipelagoManager.StrawberriesRequired : 0);
 
 					batch.PopMatrix();
 				}
 
-				if (Paused)
+				if (Game.Instance.ArchipelagoEnabled && Paused)
                 {
 					Vec2 pos = new Vec2(4, UI.IconSize + 8);
 
@@ -924,7 +928,8 @@ public class World : Scene
 			{
 				var scroll = -new Vec2(1.25f, 0.9f) * (float)(Time.Duration.TotalSeconds) * 0.05f;
 
-				Game.Instance.ArchipelagoManager.HandleMessageQueue(batch, font, bounds);
+				if (Game.Instance.ArchipelagoEnabled)
+					Game.Instance.ArchipelagoManager.HandleMessageQueue(batch, font, bounds);
 
 				batch.PushBlend(BlendMode.Add);
 				batch.Image(Assets.Textures["overworld/overlay"], 
@@ -978,13 +983,10 @@ public class World : Scene
 
 	private void RenderModels(ref RenderState state, List<ModelEntry> models, ModelFlags flags)
 	{
-		foreach (var it in models)
-		{
-			if (!it.Model.Flags.Has(flags))
-				continue;
-
-			state.ModelMatrix = it.Model.Transform * it.Actor.Matrix;
-			it.Model.Render(ref state);
-		}
+		 foreach (var it in models.Where(it => it.Model.Flags.Has(flags)))
+		 {
+			 state.ModelMatrix = it.Model.Transform * it.Actor.Matrix;
+			 it.Model.Render(ref state);
+		 }
 	}
 }

@@ -28,9 +28,15 @@ public class Overworld : Scene
 
 			if (Save.Instance.TryGetRecord(Level.ID) is {} record)
 			{
-				//Menu.Add(new Menu.Option("Continue"));
-				Menu.Add(new Menu.Option(Loc.Str("Restart")));
-				Complete = record.GetFlag("Strawberries") >= Level.Strawberries;
+				if (Game.Instance.ArchipelagoEnabled)
+				{
+					Menu.Add(new Menu.Option(Loc.Str("Restart")));
+					Complete = record.GetFlag("Strawberries") >= Level.Strawberries;
+				}
+				else
+				{
+					Menu.Add(new Menu.Option("Continue"));
+				}
 			}
 			else
 			{
@@ -86,12 +92,12 @@ public class Overworld : Scene
 
 					if (Save.Instance.TryGetRecord(Level.ID) is { } record)
 					{
-						strawbs = record.GetFlag("Strawberries");
+						strawbs = Game.Instance.ArchipelagoEnabled ? record.GetFlag("Strawberries") : record.Strawberries.Count;
 						deaths = record.Deaths;
 						time = record.Time;
 					}
 
-					UI.Strawberries(batch, strawbs, Game.Instance.ArchipelagoManager.StrawberriesRequired, new Vec2(-8, -UI.IconSize / 2 - 4), 1);
+					UI.Strawberries(batch, strawbs, new Vec2(-8, -UI.IconSize / 2 - 4), 1, Game.Instance.ArchipelagoEnabled ? Game.Instance.ArchipelagoManager.StrawberriesRequired : 0);
 					UI.Deaths(batch, deaths, new Vec2(8, -UI.IconSize / 2 - 4), 0);
 					UI.Timer(batch, time, new Vec2(0, UI.IconSize / 2 + 4), 0.5f);
 				}
@@ -237,13 +243,19 @@ public class Overworld : Scene
 		{
 			if (Controls.Confirm.ConsumePress() && entries[index].SelectionEase > 0.50f)
 			{
-				if (entries[index].Menu.Index == 0)
+				if (Game.Instance.ArchipelagoEnabled && entries[index].Menu.Index == 0)
                 {
                     Audio.Play(Sfx.main_menu_start_game);
                     Game.Instance.Music.Stop();
                     Save.Instance.EraseRecord(entries[index].Level.ID);
                     state = States.Entering;
                 }
+				else if (!Game.Instance.ArchipelagoEnabled && entries[index].Menu.Index == 1)
+				{
+					Audio.Play(Sfx.main_menu_restart_confirm_popup);
+					restartConfirmMenu.Index = 0;
+					state = States.Restarting;
+				}
 				else
 				{
 					Audio.Play(Sfx.main_menu_start_game);

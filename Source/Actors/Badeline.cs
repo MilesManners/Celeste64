@@ -68,10 +68,23 @@ public class Badeline : NPC
 		yield return Co.Run(cs.FaceEachOther(World.Get<Player>(), this));
 
 		int index = Save.CurrentRecord.GetFlag(TALK_FLAG) + 1;
-		yield return Co.Run(cs.Say(Loc.Lines($"Baddy{index}")));
-		if (Game.Instance.ArchipelagoManager.Friendsanity)
+		if (Game.Instance.ArchipelagoEnabled && Game.Instance.ArchipelagoManager.Friendsanity)
 		{
-			Save.CurrentRecord.SetFlag($"Baddy{index}", 1);
+			var lines = Loc.Lines("BaddyRando");
+			
+			var item = Game.Instance.ArchipelagoManager.ScoutLocation($"Baddy{index}");
+			var itemName = ArchipelagoManager.ItemIDToString[item.Item];
+			var player = item.Player;
+			var localPlayer = Game.Instance.ArchipelagoManager.Slot;
+			var formattedItemName = localPlayer == player ? itemName : $"{Game.Instance.ArchipelagoManager.GetPlayerName(player)}'s {itemName}";
+			
+			List<Language.Line> newLines = [new (lines[0].Face, string.Format(lines[0].Text, formattedItemName), lines[0].Voice)];
+			yield return Co.Run(cs.Say(newLines));
+			Save.CurrentRecord.SetFlag($"Baddy{index}");
+		}
+		else
+		{
+			yield return Co.Run(cs.Say(Loc.Lines($"Baddy{index}")));
 		}
 		Save.CurrentRecord.IncFlag(TALK_FLAG);
 		CheckForDialog();
@@ -86,6 +99,18 @@ public class Badeline : NPC
 	private void CheckForDialog()
 	{ 
 		InteractEnabled = Loc.HasLines($"Baddy{Save.CurrentRecord.GetFlag(TALK_FLAG) + 1}");
+		
+		if (Game.Instance.ArchipelagoEnabled && Game.Instance.ArchipelagoManager.Friendsanity && !InteractEnabled)
+		{
+			Model.MakeMaterialsUnique();
+			Model.Flags = ModelFlags.Transparent;	
+
+			foreach (var mat in Model.Materials)
+			{
+				mat.Texture = Assets.Textures["white"];
+				mat.Color = new Color(0x99ddf4) * 0.70f;
+			}
+		}
 	}
 }
 
