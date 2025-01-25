@@ -1493,7 +1493,9 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		// jump & gravity
 		if (TCoyote > 0 && Controls.Jump.ConsumePress())
 			Jump();
-		else if (WallJumpCheck() || (Controls.Climb.Down && TryClimb()))
+		else if (Controls.Climb.Down && TryClimb())
+			WallJump(true);
+		else if (WallJumpCheck())
 			WallJump(false);
 		else
 		{
