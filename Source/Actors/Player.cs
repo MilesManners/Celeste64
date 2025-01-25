@@ -1082,6 +1082,8 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	{
 		if (climbing)
 			TClimbCooldown = DefaultClimbCooldown;
+		else
+			TargetFacing = -TargetFacing;
 		
 		HoldJumpSpeed = velocity.Z = JumpSpeed;
 		THoldJump = JumpHoldTime;
@@ -1491,7 +1493,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		// jump & gravity
 		if (TCoyote > 0 && Controls.Jump.ConsumePress())
 			Jump();
-		else if (WallJumpCheck())
+		else if (WallJumpCheck() || (Controls.Climb.Down && TryClimb()))
 			WallJump(false);
 		else
 		{
@@ -1793,7 +1795,6 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		if (Controls.Jump.ConsumePress())
 		{
 			StateMachine.State = States.Normal;
-			TargetFacing = -TargetFacing;
 			WallJump(true);
 			return;
 		}
