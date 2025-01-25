@@ -1674,8 +1674,10 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	{
 		if (DashedOnGround)
 			velocity = new Vec3(dir, 0) * DashSpeed;
+		else if (Controls.Jump.Pressed)
+			velocity = new Vec3(dir, .6f).Normalized() * DashSpeed;
 		else
-			velocity = new Vec3(dir, .2f).Normalized() * DashSpeed;
+			velocity = new Vec3(dir, 0f).Normalized() * DashSpeed;
 	}
 
 	#endregion
