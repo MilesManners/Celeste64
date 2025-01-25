@@ -67,26 +67,17 @@ public class Routine
 	public void Queue(CoEnumerator routine)
 	{
 		if (running.Count <= 0)
-		{
 			Run(routine);
-		}
 		else
-		{
 			running.Insert(0, routine);
-		}
 	}
 
 	public void Queue(Co node)
 	{
 		if (running.Count <= 0)
-		{
 			Run(node);
-		}
-		else
-		{
-			if (node.Routine != null)
-				running.Insert(0, node.Routine);
-		}
+		else if (node.Routine != null)
+			running.Insert(0, node.Routine);
 	}
 
 	public void Clear()
@@ -107,11 +98,8 @@ public class Routine
 			return;
 		}
 
-		if (condition != null && !condition.Invoke())
-			return;
-
-		if (running.Count <= 0)
-			return;
+		if (condition != null && !condition.Invoke()) return;
+		if (running.Count <= 0) return;
 
 		var it = running[^1];
 		var id = runningID;

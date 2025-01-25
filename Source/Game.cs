@@ -176,6 +176,9 @@ public class Game : Module
 	public SoundHandle? AmbienceWav;
 	public SoundHandle? MusicWav;
 
+	public ArchipelagoManager ArchipelagoManager;
+	public bool ArchipelagoEnabled;
+
 	private Task? SaveTask;
 	private SavingState _SaveSt = SavingState.Ready;
 	/// <summary>

@@ -1072,19 +1072,22 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		ModManager.Instance.OnPlayerJumped(this, JumpType.Jumped);
 	}
 
-	public virtual void WallJump()
+	public virtual void WallJump(bool climbing)
 	{
 		HoldJumpSpeed = velocity.Z = JumpSpeed;
 		THoldJump = JumpHoldTime;
 		AutoJump = false;
 
-		var velXY = TargetFacing * WallJumpXYSpeed;
-		velocity = velocity.WithXY(velXY);
+		var velXy = Vec2.Zero;
+		if (!climbing)
+			velXy = TargetFacing * WallJumpXYSpeed;
+		
+		velocity = velocity.WithXY(velXy);
 
 		AddPlatformVelocity(false);
 		CancelGroundSnap();
 
-		ModelScale = new(.6f, .6f, 1.4f);
+		ModelScale = new Vec3(.6f, .6f, 1.4f);
 		Audio.Play(Sfx.sfx_jump_wall, Position);
 		ModManager.Instance.OnPlayerJumped(this, JumpType.WallJumped);
 	}
@@ -1480,7 +1483,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		if (TCoyote > 0 && Controls.Jump.ConsumePress())
 			Jump();
 		else if (WallJumpCheck())
-			WallJump();
+			WallJump(false);
 		else
 		{
 			if (THoldJump > 0 && (AutoJump || Controls.Jump.Down))
@@ -1782,7 +1785,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		{
 			StateMachine.State = States.Normal;
 			TargetFacing = -TargetFacing;
-			WallJump();
+			WallJump(true);
 			return;
 		}
 

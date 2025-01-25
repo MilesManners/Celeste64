@@ -15,6 +15,7 @@ public class Theo : NPC
 
 	public override void Interact(Player player)
 	{
+		TalkingTo = player;
 		World.Add(new Cutscene(Conversation));
 	}
 
