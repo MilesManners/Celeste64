@@ -88,7 +88,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	public virtual float JumpSpeed { get; set; }
 	public virtual float JumpXYBoost { get; set; }
 	public virtual float CoyoteTime { get; set; }
-	public virtual float WallJumpXYSpeed => MaxSpeed * 2.0f;
+	public virtual float WallJumpXYSpeed => MaxSpeed * 1.5f;
 
 	public virtual float DashSpeed { get; set; }
 	public virtual float DashEndSpeedMult { get; set; }
@@ -1678,8 +1678,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 			velocity = new Vec3(dir, 0) * DashSpeed;
 		else
 			// velocity = new Vec3(dir, .4f).Normalized() * DashSpeed;
-			velocity = new Vec3(dir, .4f).Normalized() * DashSpeed;
-
+			velocity = new Vec3(dir, 0) * DashSpeed;
 	}
 
 	#endregion
