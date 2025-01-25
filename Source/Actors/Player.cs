@@ -1626,7 +1626,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		if (Controls.Move.Value != Vec2.Zero && Vec2.Dot(Controls.Move.Value, TargetFacing) >= -.2f)
 		{
 			TargetFacing = Calc.RotateToward(TargetFacing, RelativeMoveInput, DashRotateSpeed * Time.Delta, 0);
-			SetDashSpeed(TargetFacing);
+			//SetDashSpeed(TargetFacing);
 		}
 
 		if (TNoDashJump > 0)
@@ -1675,9 +1675,15 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		if (DashedOnGround)
 			velocity += new Vec3(dir, 0) * DashSpeed;
 		else if (Controls.Jump.Down)
+		{
 			velocity += new Vec3(dir, .6f).Normalized() * DashSpeed;
+			velocity.Z = .6f;
+		}
 		else
+		{
 			velocity += new Vec3(dir, 0f).Normalized() * DashSpeed;
+			velocity.Z = 0;
+		}
 	}
 
 	#endregion
