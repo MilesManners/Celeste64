@@ -18,7 +18,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	public virtual float DefaultMaxSpeed => 64;
 	public virtual float DefaultRotateSpeed => MathF.Tau * 1.5f;
 	public virtual float DefaultRotateSpeedAboveMax => MathF.Tau * .6f;
-	public virtual float DefaultFriction => 800;
+	public virtual float DefaultFriction => 1600;
 	public virtual float DefaultAirFrictionMult => .1f;
 	public virtual float DefaultGravity => 600;
 	public virtual float DefaultMaxFall => -120;
@@ -1673,17 +1673,11 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	public virtual void SetDashSpeed(in Vec2 dir)
 	{
 		if (DashedOnGround)
-			velocity += new Vec3(dir, 0) * DashSpeed;
+			velocity = new Vec3(velocity.XY(), 0) + new Vec3(dir, 0) * DashSpeed;
 		else if (Controls.Jump.Down)
-		{
-			velocity += new Vec3(dir, .6f).Normalized() * DashSpeed;
-			velocity.Z = .6f;
-		}
+			velocity = new Vec3(velocity.XY(), 0) + new Vec3(dir, .6f).Normalized() * DashSpeed;
 		else
-		{
-			velocity += new Vec3(dir, 0f).Normalized() * DashSpeed;
-			velocity.Z = 0;
-		}
+			velocity = new Vec3(velocity.XY(), 0) + new Vec3(dir, 0f).Normalized() * DashSpeed;
 	}
 
 	#endregion
