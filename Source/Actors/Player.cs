@@ -65,6 +65,8 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	public virtual float DefaultFeatherExitXYMult => .5f;
 	public virtual float DefaultFeatherExitZSpeed => 60;
 
+	public virtual float DefaultClimbCooldown => .5f;
+
 	#endregion
 
 	#region Movement Properties
@@ -126,6 +128,8 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	public virtual float FeatherDuration { get; set; }
 	public virtual float FeatherExitXYMult { get; set; }
 	public virtual float FeatherExitZSpeed { get; set; }
+	
+	public virtual float ClimbCooldown { get; set; }
 
 	#endregion
 
@@ -184,6 +188,8 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		FeatherAccel = DefaultFeatherAccel;
 		FeatherDuration = DefaultFeatherDuration;
 		FeatherExitXYMult = DefaultFeatherExitXYMult;
+		
+		ClimbCooldown = DefaultClimbCooldown;
 	}
 
 	// These are no longer used. This gets populated from SkinInfo.
@@ -1074,6 +1080,9 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 
 	public virtual void WallJump(bool climbing)
 	{
+		if (climbing)
+			TClimbCooldown = DefaultClimbCooldown;
+		
 		HoldJumpSpeed = velocity.Z = JumpSpeed;
 		THoldJump = JumpHoldTime;
 		AutoJump = false;
@@ -1934,7 +1943,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 			StateMachine.State = States.Normal;
 			velocity = new(TargetFacing * ClimbHopForwardSpeed, ClimbHopUpSpeed);
 			TNoMove = ClimbHopNoMoveTime;
-			TClimbCooldown = 0.3f;
+			TClimbCooldown = ClimbCooldown;
 			AutoJump = false;
 			AddPlatformVelocity(false);
 			return;
