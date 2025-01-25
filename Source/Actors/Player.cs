@@ -88,7 +88,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	public virtual float JumpSpeed { get; set; }
 	public virtual float JumpXYBoost { get; set; }
 	public virtual float CoyoteTime { get; set; }
-	public virtual float WallJumpXYSpeed => MaxSpeed * 1.5f;
+	public virtual float WallJumpXYSpeed => MaxSpeed * 1.3f;
 
 	public virtual float DashSpeed { get; set; }
 	public virtual float DashEndSpeedMult { get; set; }
@@ -1662,14 +1662,12 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 
 	public virtual bool RefillDash(int amount = 1)
 	{
-		if (DashesLocal < amount)
-		{
-			DashesLocal = amount;
-			TDashResetFlash = .05f;
-			return true;
-		}
-		else
-			return false;
+		if (DashesLocal >= amount) return false;
+		
+		DashesLocal = amount;
+		TDashResetFlash = .05f;
+		return true;
+
 	}
 
 	public virtual void SetDashSpeed(in Vec2 dir)
@@ -1677,8 +1675,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		if (DashedOnGround)
 			velocity = new Vec3(dir, 0) * DashSpeed;
 		else
-			// velocity = new Vec3(dir, .4f).Normalized() * DashSpeed;
-			velocity = new Vec3(dir, 0) * DashSpeed;
+			velocity = new Vec3(dir, .2f).Normalized() * DashSpeed;
 	}
 
 	#endregion
