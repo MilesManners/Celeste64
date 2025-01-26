@@ -6,5 +6,13 @@
 		"Strawberries": 30,
 		"Preview": "Postcards/ForsakenCity",
 		"Map": "1"
+	},
+	{
+		"ID": "1_OLD_SITE",
+		"Name": "Old Site",
+		"Label": "Created to test mechanics\nby Miss Manners",
+		"Strawberries": 30,
+		"Preview": "Postcards/OldSite",
+		"Map": "2"
 	}
 ]

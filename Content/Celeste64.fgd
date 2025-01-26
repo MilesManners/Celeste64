@@ -186,3 +186,7 @@
     climbable(string)  : "Is this climbable" : "true"
     canwalljump(string)  : "Can the player wall jump off of this" : "true"
 ]
+
+@SolidClass = DreamBlock : "Teleports the player to the opposite side of the block when dashing into it"
+[
+]
