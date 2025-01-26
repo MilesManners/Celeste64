@@ -1,6 +1,6 @@
 ﻿namespace Celeste64;
 
-public class DreamBlock : Solid, IDashTrigger
+public class DreamBlock : Solid
 {
 	public virtual bool BouncesPlayer { get; set; }
 
