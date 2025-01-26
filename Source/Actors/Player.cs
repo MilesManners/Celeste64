@@ -1015,7 +1015,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 			}
 			else if (hit.Actor is DreamBlock && StateMachine.State is States.Dashing)
 			{
-				TargetFacing = -hit.Normal.XY().Normalized();
+				//TargetFacing = -hit.Normal.XY().Normalized();
 				CurrentDreamBlock = hit.Actor;
 				StateMachine.State = States.Disabled;
 				return false;
@@ -2651,7 +2651,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		
 		// TODO: exit jump
 		if (Controls.Jump.Down)
-			AutoJump = true;
+			WallJump(false);
 
 		// TODO: instant climb
 		// TODO: kill player if exiting into wall
