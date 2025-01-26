@@ -1562,6 +1562,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	public float TDashResetFlash;
 	public float TNoDashJump;
 	public bool DashedOnGround;
+	public bool DashedUpwards;
 	public int DashTrailsCreated;
 
 	public virtual bool TryDash()
@@ -1583,6 +1584,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 
 		LastDashHairColor = DashesLocal <= 0 ? Skin.HairNoDash : Skin.HairNormal;
 		DashedOnGround = OnGround;
+		DashedUpwards = Controls.Jump.Down;
 		SetDashSpeed(TargetFacing);
 		AutoJump = true;
 
@@ -1672,12 +1674,10 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 
 	public virtual void SetDashSpeed(in Vec2 dir)
 	{
-		if (DashedOnGround)
-			velocity = new Vec3(dir, 0) * DashSpeed;
-		else if (Controls.Jump.Down)
+		if (DashedUpwards)
 			velocity = new Vec3(dir, .6f).Normalized() * DashSpeed;
-		else
-			velocity = new Vec3(dir, 0f).Normalized() * DashSpeed;
+		else if (DashedOnGround)
+			velocity = new Vec3(dir, 0) * DashSpeed;
 	}
 
 	#endregion
@@ -1730,11 +1730,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 			bool dotMatches = Vec2.Dot(velXY.Normalized(), TargetFacing) >= .7f;
 
 			// acceleration
-			float accel;
-			if (dotMatches)
-				accel = SkiddingAccel;
-			else
-				accel = SkiddingStartAccel;
+			float accel = dotMatches ? SkiddingAccel : SkiddingStartAccel;
 			Calc.Approach(ref velXY, RelativeMoveInput * MaxSpeed, accel * Time.Delta);
 			velocity = velocity.WithXY(velXY);
 
