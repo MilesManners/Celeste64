@@ -121,6 +121,7 @@ public class Map
 		{
 			return new DreamBlock();
 		})
+		{ IsSolidGeometry = true }
 	};
 
 	internal static Dictionary<string, ActorFactory> ModActorFactories = new();
