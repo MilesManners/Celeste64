@@ -2645,8 +2645,14 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		PointShadowAlpha = 1;
 		DrawModel = DrawHair = true;
 		
+		// Reset dash
+		TDashCooldown = 0;
+		DashesLocal = Math.Max(DashesLocal, 1); // Just in case we have more dashes than vanilla
 		
 		// TODO: exit jump
+		if (Controls.Jump.Down)
+			AutoJump = true;
+
 		// TODO: instant climb
 		// TODO: kill player if exiting into wall
 	}
