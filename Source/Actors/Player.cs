@@ -951,7 +951,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		}
 
 		Hair.Color = color;
-		Hair.Nodes = (InFeatherState ? 18 : (DashesLocal >= 2 ? 16 : 10));
+		Hair.Nodes = InFeatherState ? 18 : DashesLocal * 6 + 4;
 	}
 
 	public virtual void SweepTestMove(Vec3 delta, bool resolveImpact)
