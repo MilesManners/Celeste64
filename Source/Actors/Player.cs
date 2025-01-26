@@ -66,7 +66,8 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	public virtual float DefaultFeatherExitZSpeed => 60;
 
 	public virtual float DefaultClimbCooldown => .5f;
-
+	public virtual float DefaultDreamBlockExitCheckDist => 3;
+	
 	#endregion
 
 	#region Movement Properties
@@ -130,6 +131,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	public virtual float FeatherExitZSpeed { get; set; }
 	
 	public virtual float ClimbCooldown { get; set; }
+	public virtual float DreamBlockExitCheckDist { get; set; }
 
 	#endregion
 
@@ -190,6 +192,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		FeatherExitXYMult = DefaultFeatherExitXYMult;
 		
 		ClimbCooldown = DefaultClimbCooldown;
+		DreamBlockExitCheckDist = DefaultDreamBlockExitCheckDist;
 	}
 
 	// These are no longer used. This gets populated from SkinInfo.
@@ -235,7 +238,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	public static Vec3 StoredCameraForward;
 	public static float StoredCameraDistance;
 
-	public enum States { Normal, Dashing, Skidding, Climbing, StrawbGet, FeatherStart, Feather, Respawn, Dead, StrawbReveal, Cutscene, Bubble, Cassette, LoadingZone, DebugFly };
+	public enum States { Normal, Dashing, Skidding, Climbing, StrawbGet, FeatherStart, Feather, Respawn, Dead, StrawbReveal, Cutscene, Bubble, Cassette, LoadingZone, DebugFly, Disabled };
 	public enum Events { Land };
 	public enum JumpType { Jumped, WallJumped, SkidJumped, DashJumped };
 
@@ -310,6 +313,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		&& StateMachine.State != States.StrawbReveal
 		&& StateMachine.State != States.Respawn
 		&& StateMachine.State != States.Dead
+		&& StateMachine.State != States.Disabled
 		&& GetCurrentCustomState() is not { IsAbleToPickup: false };
 
 	public virtual bool IsAbleToPause
@@ -371,6 +375,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		StateMachine.InitState(States.Cassette, null, null, StCassetteExit, StCassetteRoutine);
 		StateMachine.InitState(States.LoadingZone, null, null, StLoadingZoneExit, StLoadingZoneRoutine);
 		StateMachine.InitState(States.DebugFly, StDebugFlyUpdate, StDebugFlyEnter, StDebugFlyExit);
+		StateMachine.InitState(States.Disabled, StDisabledUpdate, StDisabledEnter, StDisabledExit);
 		// Register custom player states
 		var nextId = CustomPlayerStateRegistry.BaseId;
 		foreach (var customState in CustomPlayerStateRegistry.RegisteredStates)
@@ -530,8 +535,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		if (!DoUpdate) return;
 
 		// only update camera if not dead
-		if (StateMachine.State != States.Respawn && StateMachine.State != States.Dead &&
-			StateMachine.State != States.StrawbReveal && StateMachine.State != States.Cassette && StateMachine.State != States.LoadingZone &&
+		if (StateMachine.State is not (States.Respawn or States.Dead or States.StrawbReveal or States.Cassette or States.LoadingZone) &&
 			this == world?.MainPlayer)
 		{
 
@@ -562,7 +566,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		}
 
 		// don't do anything if dead
-		if (StateMachine.State == States.Respawn || StateMachine.State == States.Dead || StateMachine.State == States.Cutscene)
+		if (StateMachine.State is States.Respawn or States.Dead or States.Cutscene)
 		{
 			StateMachine.Update();
 			return;
@@ -575,7 +579,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		}
 
 		// death plane
-		if (!InBubble && StateMachine.State != States.DebugFly)
+		if (!InBubble && StateMachine.State is not States.DebugFly)
 		{
 			if (Position.Z < World.DeathPlane ||
 				World.Overlaps<DeathBlock>(SolidWaistTestPos) ||
@@ -586,9 +590,8 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 			}
 		}
 
-		if (StateMachine.State != States.Cassette &&
-			StateMachine.State != States.LoadingZone &&
-			World.OverlapsFirst<LoadingZone>(SolidWaistTestPos) is { } loadingZone)
+		if (StateMachine.State is not (States.Cassette or States.LoadingZone) &&
+		    World.OverlapsFirst<LoadingZone>(SolidWaistTestPos) is { } loadingZone)
 		{
 			EnterLoadingZone(loadingZone);
 			return;
@@ -732,7 +735,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		{
 			// update camera origin position
 			{
-				float ZPad = StateMachine.State == States.Climbing ? 0 : 8;
+				float ZPad = StateMachine.State is States.Climbing ? 0 : 8;
 				CameraOriginPos.X = Position.X;
 				CameraOriginPos.Y = Position.Y;
 
@@ -783,7 +786,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 			Model.Update();
 			Model.Transform = Matrix.CreateScale(ModelScale * 3);
 
-			if (StateMachine.State != States.Feather && StateMachine.State != States.FeatherStart
+			if (StateMachine.State is not (States.Feather or States.FeatherStart)
 				&& GetCurrentCustomState() is not { ControlHairColor: true })
 			{
 				Color color;
@@ -805,12 +808,8 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 			var hairMatrix = Matrix.Identity;
 
 			foreach (var it in Model.Instance.Armature.LogicalNodes)
-			{
 				if (it.Name == "Head")
-				{
 					hairMatrix = it.ModelMatrix * SkinnedModel.BaseTranslation * Model.Transform * Matrix;
-				}
-			}
 
 			Hair.Flags = Model.Flags;
 			Hair.Forward = -new Vec3(Facing, 0);
@@ -922,14 +921,9 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 			if (Controls.Move.Value == Vec2.Zero)
 				return Vec2.Zero;
 
-			Vec2 forward, side;
-
 			var cameraForward = (World.Camera.LookAt - World.Camera.Position).Normalized().XY();
-			if (cameraForward is { X: 0, Y: 0 })
-				forward = TargetFacing;
-			else
-				forward = cameraForward.Normalized();
-			side = Vec2.Transform(forward, Matrix3x2.CreateRotation(MathF.PI / 2));
+			var forward = cameraForward is { X: 0, Y: 0 } ? TargetFacing : cameraForward.Normalized();
+			var side = Vec2.Transform(forward, Matrix3x2.CreateRotation(MathF.PI / 2));
 
 			var input = -Controls.Move.Value.Normalized();
 			if (Vec2.Dot(input, Vec2.UnitY) >= .985f)
@@ -1010,12 +1004,18 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 			World.SolidWallCheckNearest(SolidHeadTestPos, WallPushoutDist, out hit))
 		{
 			// feather state handling
-			if (resolveImpact && StateMachine.State == States.Feather && TFeatherWallBumpCooldown <= 0 && !(Controls.Climb.Down && TryClimb()))
+			if (resolveImpact && StateMachine.State is States.Feather && TFeatherWallBumpCooldown <= 0 && !(Controls.Climb.Down && TryClimb()))
 			{
 				Position += hit.Pushout;
 				velocity = velocity.WithXY(Vec2.Reflect(velocity.XY(), hit.Normal.XY().Normalized()));
 				TFeatherWallBumpCooldown = 0.50f;
 				Audio.Play(Sfx.sfx_feather_state_bump_wall, Position);
+			}
+			else if (hit.Actor is DreamBlock)
+			{
+				TargetFacing = hit.Normal.XY().Normalized();
+				CurrentDreamBlock = (DreamBlock)hit.Actor;
+				StateMachine.State = States.Disabled;
 			}
 			// does it handle being dashed into?
 			else if (resolveImpact && hit.Actor is IDashTrigger trigger && !hit.Actor.Destroying && velocity.XY().Length() > 90)
@@ -1208,7 +1208,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		// let us snap up to walls if we're jumping for them
 		// note: if vel.z is allowed to be downwards then we awkwardly re-grab when sliding off
 		// the bottoms of walls, which is really bad feeling
-		if (!result && velocity.Z > 0 && !OnGround && StateMachine.State != States.Climbing)
+		if (!result && velocity.Z > 0 && !OnGround && StateMachine.State is States.Climbing)
 			result = ClimbCheckAt(Vec3.UnitZ * 4, out wall);
 
 		if (result)
@@ -1239,15 +1239,15 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	public virtual bool WallJumpCheck()
 	{
 		if (Controls.Jump.Pressed
-		&& World.SolidWallCheckClosestToNormal(SolidWaistTestPos, ClimbCheckDist, -new Vec3(TargetFacing, 0), out var hit) && hit.Actor is Solid { CanWallJump: true })
+		    && World.SolidWallCheckClosestToNormal(SolidWaistTestPos, ClimbCheckDist, -new Vec3(TargetFacing, 0), out var hit) && hit.Actor is Solid { CanWallJump: true })
 		{
 			Controls.Jump.ConsumePress();
-			Position += (hit.Pushout * (WallPushoutDist / ClimbCheckDist));
+			Position += hit.Pushout * (WallPushoutDist / ClimbCheckDist);
 			TargetFacing = hit.Normal.XY().Normalized();
 			return true;
 		}
-		else
-			return false;
+
+		return false;
 	}
 
 	public virtual void Spring(Spring spring)
@@ -2043,7 +2043,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 
 	public virtual void StrawbGet(Strawberry strawb)
 	{
-		if (StateMachine.State != States.StrawbGet)
+		if (StateMachine.State is not States.StrawbGet)
 		{
 			LastStrawb = strawb;
 			StateMachine.State = States.StrawbGet;
@@ -2101,7 +2101,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		Audio.Play(Sfx.sfx_dashcrystal, Position);
 		World.HitStun = 0.05f;
 
-		if (StateMachine.State == States.Feather)
+		if (StateMachine.State is States.Feather)
 		{
 			TFeather = FeatherDuration;
 			FeatherZ = feather.Position.Z - 2;
@@ -2406,7 +2406,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 
 	public virtual void EnterCassette(Cassette it)
 	{
-		if (StateMachine.State != States.Cassette)
+		if (StateMachine.State is not States.Cassette)
 		{
 			cassette = it;
 			StateMachine.State = States.Cassette;
@@ -2494,7 +2494,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 
 	public virtual void EnterLoadingZone(LoadingZone it)
 	{
-		if (StateMachine.State != States.LoadingZone)
+		if (StateMachine.State is not States.LoadingZone)
 		{
 			loadingZone = it;
 			StateMachine.State = States.LoadingZone;
@@ -2612,6 +2612,40 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	}
 
 	#endregion
+	
+	#region Disabled State
+
+	public virtual float DefaultDreamBlockSpeed => DefaultDashSpeed;
+	public DreamBlock? CurrentDreamBlock;
+	
+	// TODO: rename state to dream block, it turned out to be too specific
+	// TODO?: upward dash through dream block
+	public virtual void StDisabledEnter()
+	{
+		DrawModel = DrawHair = false;
+		PointShadowAlpha = 0;
+	}
+
+	public virtual void StDisabledUpdate()
+	{
+		if (World.SolidRayCast(SolidWaistTestPos, new Vec3(TargetFacing, 0), DreamBlockExitCheckDist, out var hit) &&
+		    hit.Actor == CurrentDreamBlock)
+			velocity = new Vec3(TargetFacing, 0) * DashSpeed;
+		else
+			StateMachine.State = States.Normal;
+	}
+	
+	public virtual void StDisabledExit()
+	{
+		CurrentDreamBlock = null;
+		PointShadowAlpha = 1;
+		DrawModel = DrawHair = true;
+		// TODO: exit jump
+		// TODO: instant climb
+		// TODO: kill player if exiting into wall
+	}
+
+	#endregion
 
 	#region Graphics
 
@@ -2619,33 +2653,25 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	{
 		// debug: draw camera origin pos
 		if (World.DebugDraw)
-		{
 			populate.Add(Sprite.CreateBillboard(World, CameraOriginPos, "circle", 1, Color.Red));
-		}
 
 		// debug: draw wall up-normal
 		if (World.DebugDraw)
 		{
-			if (StateMachine.State == States.Climbing)
+			if (StateMachine.State is States.Climbing)
 			{
 				var up = ClimbingWallNormal.UpwardPerpendicularNormal();
 
 				for (int i = 0; i < 12; i++)
-				{
 					populate.Add(Sprite.CreateBillboard(World, SolidWaistTestPos + up * i * 1.5f, "circle", 1, Color.Red));
-				}
 			}
 		}
 
 		if (InBubble)
-		{
 			populate.Add(Sprite.CreateBillboard(World, Position + Vec3.UnitZ * 8, "bubble", 10, Color.White) with { Post = true });
-		}
 
 		if (InFeatherState)
-		{
 			populate.Add(Sprite.CreateBillboard(World, Position + Forward * 4 + Vec3.UnitZ * 8, "gradient", 12, new Color(Skin.HairFeather) * 0.50f));
-		}
 
 		if (DrawOrbs && DrawOrbsEase > 0)
 		{
