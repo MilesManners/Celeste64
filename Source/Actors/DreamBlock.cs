@@ -10,6 +10,6 @@ public class DreamBlock : Solid, IDashTrigger
 
 	public virtual void HandleDash(Vec3 velocity)
 	{
-		Audio.Play(Sfx.sfx_breakable_wall_wood, Position);
+		// Audio.Play(Sfx.sfx_breakable_wall_wood, Position);
 	}
 }

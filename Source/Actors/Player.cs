@@ -983,6 +983,8 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	/// </summary>
 	public virtual bool Popout(bool resolveImpact)
 	{
+		if (StateMachine.State is States.Disabled) return false;
+		
 		// ground test
 		if (GroundCheck(out var pushout, out _, out _))
 		{
@@ -1011,11 +1013,12 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 				TFeatherWallBumpCooldown = 0.50f;
 				Audio.Play(Sfx.sfx_feather_state_bump_wall, Position);
 			}
-			else if (hit.Actor is DreamBlock)
+			else if (hit.Actor is DreamBlock && StateMachine.State is States.Dashing)
 			{
-				TargetFacing = hit.Normal.XY().Normalized();
-				CurrentDreamBlock = (DreamBlock)hit.Actor;
+				TargetFacing = -hit.Normal.XY().Normalized();
+				CurrentDreamBlock = hit.Actor;
 				StateMachine.State = States.Disabled;
+				return false;
 			}
 			// does it handle being dashed into?
 			else if (resolveImpact && hit.Actor is IDashTrigger trigger && !hit.Actor.Destroying && velocity.XY().Length() > 90)
@@ -2616,7 +2619,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	#region Disabled State
 
 	public virtual float DefaultDreamBlockSpeed => DefaultDashSpeed;
-	public DreamBlock? CurrentDreamBlock;
+	public Actor? CurrentDreamBlock;
 	
 	// TODO: rename state to dream block, it turned out to be too specific
 	// TODO?: upward dash through dream block
@@ -2628,8 +2631,9 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 
 	public virtual void StDisabledUpdate()
 	{
-		if (World.SolidRayCast(SolidWaistTestPos, new Vec3(TargetFacing, 0), DreamBlockExitCheckDist, out var hit) &&
-		    hit.Actor == CurrentDreamBlock)
+		// Check if we're still in the dream block
+		if (World.SolidRayCast(SolidWaistTestPos, new Vec3(TargetFacing, 0), DreamBlockExitCheckDist, out var hit, false) &&
+		    ReferenceEquals(hit.Actor, CurrentDreamBlock))
 			velocity = new Vec3(TargetFacing, 0) * DashSpeed;
 		else
 			StateMachine.State = States.Normal;
