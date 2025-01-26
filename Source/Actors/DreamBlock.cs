@@ -6,6 +6,7 @@ public class DreamBlock : Solid
 
 	public DreamBlock()
 	{
+		Model.Flags = ModelFlags.Transparent;
 	}
 
 	public virtual void HandleDash(Vec3 velocity)
