@@ -66,7 +66,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 	public virtual float DefaultFeatherExitZSpeed => 60;
 
 	public virtual float DefaultClimbCooldown => .5f;
-	public virtual float DefaultDreamBlockExitCheckDist => 3;
+	public virtual float DefaultDreamBlockExitCheckDist => 1000;
 	
 	#endregion
 
