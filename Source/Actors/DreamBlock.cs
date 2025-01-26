@@ -7,6 +7,9 @@ public class DreamBlock : Solid
 	public DreamBlock()
 	{
 		Model.Flags = ModelFlags.Transparent;
+		var material = new DefaultMaterial(Model.Materials[0].Texture, Assets.Shaders["DreamBlock"]);
+		Model.Materials.Clear();
+		Model.Materials.Add(material);
 	}
 
 	public virtual void HandleDash(Vec3 velocity)

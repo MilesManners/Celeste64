@@ -20,8 +20,8 @@ public class DefaultMaterial : Material
 	private Vec3 sun;
 	private Color verticalFogColor;
 
-	public DefaultMaterial(Texture? texture = null)
-		: base(Assets.Shaders["Default"])
+	public DefaultMaterial(Texture? texture = null, Shader? shader = null)
+		: base(shader ?? Assets.Shaders["Default"])
 	{
 		if (!(Shader?.Has(MatrixUniformName) ?? false))
 		{
