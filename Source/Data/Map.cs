@@ -117,7 +117,10 @@ public class Map
 			}
 			return null;
 		}),
-		["DreamBlock"] = new ActorFactory((map, entity) => new DreamBlock())
+		["DreamBlock"] = new ActorFactory((map, entity) =>
+		{
+			return new DreamBlock();
+		})
 	};
 
 	internal static Dictionary<string, ActorFactory> ModActorFactories = new();

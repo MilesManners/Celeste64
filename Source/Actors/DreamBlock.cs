@@ -2,7 +2,6 @@
 
 public class DreamBlock : Solid, IDashTrigger
 {
-	public static readonly string[] GlassShards = ["shard_0", "shard_1", "shard_2"];
 	public static readonly string[] WoodShards = ["wood_shard_0", "wood_shard_1", "wood_shard_2"];
 
 	public virtual bool BouncesPlayer { get; set; }
@@ -14,13 +13,10 @@ public class DreamBlock : Solid, IDashTrigger
 	public virtual void HandleDash(Vec3 velocity)
 	{
 		var size = LocalBounds.Size;
-		var amount = (size.X * size.Y * size.Z) / 200;
-		var options = (Transparent ? GlassShards : WoodShards);
+		float amount = (size.X * size.Y * size.Z) / 200;
+		string[] options =  WoodShards;
 
-		if (Transparent)
-			Audio.Play(Sfx.sfx_glassbreak, Position);
-		else
-			Audio.Play(Sfx.sfx_breakable_wall_wood, Position);
+		Audio.Play(Sfx.sfx_breakable_wall_wood, Position);
 
 		for (int i = 0; i < amount; i++)
 		{
