@@ -1674,10 +1674,12 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 
 	public virtual void SetDashSpeed(in Vec2 dir)
 	{
-		if (DashedUpwards)
-			velocity = new Vec3(dir, .6f).Normalized() * DashSpeed;
-		else if (DashedOnGround)
+		if (DashedOnGround)
 			velocity = new Vec3(dir, 0) * DashSpeed;
+		else if (DashedUpwards)
+			velocity = new Vec3(dir, .6f).Normalized() * DashSpeed;
+		else
+			velocity = new Vec3(dir, 0f).Normalized() * DashSpeed;
 	}
 
 	#endregion
