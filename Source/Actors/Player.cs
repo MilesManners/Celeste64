@@ -2634,7 +2634,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		// Check if we're still in the dream block
 		if (World.SolidRayCast(SolidWaistTestPos, new Vec3(TargetFacing, 0), DreamBlockExitCheckDist, out var hit, false) &&
 		    ReferenceEquals(hit.Actor, CurrentDreamBlock))
-			velocity = new Vec3(TargetFacing, 0) * DashSpeed;
+			velocity = new Vec3(TargetFacing, 0).Normalized() * DashSpeed;
 		else
 			StateMachine.State = States.Normal;
 	}
@@ -2644,6 +2644,8 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 		CurrentDreamBlock = null;
 		PointShadowAlpha = 1;
 		DrawModel = DrawHair = true;
+		
+		
 		// TODO: exit jump
 		// TODO: instant climb
 		// TODO: kill player if exiting into wall
