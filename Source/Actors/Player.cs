@@ -851,7 +851,7 @@ public class Player : Actor, IHaveModels, IHaveSprites, IRidePlatforms, ICastPoi
 			snapRequested = true;
 		}
 		// try to push out of solids if we're in them
-		else
+		else if (StateMachine.State is not States.Disabled)
 		{
 			var from = cameraLookAt;// - Vec3.UnitZ * (onGround ? 0 : 6);
 			var to = cameraPosition;
