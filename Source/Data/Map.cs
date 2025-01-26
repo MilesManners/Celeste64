@@ -116,7 +116,8 @@ public class Map
 				return new SolidMesh(model, entity.GetFloatProperty("scale", 6));
 			}
 			return null;
-		})
+		}),
+		["DreamBlock"] = new ActorFactory((map, entity) => new DreamBlock())
 	};
 
 	internal static Dictionary<string, ActorFactory> ModActorFactories = new();
